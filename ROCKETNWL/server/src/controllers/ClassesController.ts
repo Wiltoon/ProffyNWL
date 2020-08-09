@@ -34,7 +34,7 @@ export default class ClassController{
           .whereRaw('`class_schedule`.`to` > ??', [timeInMinutes])
       })
       .where('classes.subject','=',subject)
-      .join('users', 'create.users_id','=','users.id')
+      .join('users', 'classes.user_id','=','users.id')
       .select(['classes.*','users.*']);
 
     return response.json(classes);
