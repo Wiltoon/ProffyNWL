@@ -1,4 +1,4 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import convertHourToMinutes from "../utils/convertHourToMinutes";
 
 import db from '../database/connection';
@@ -10,20 +10,20 @@ interface ScheduleItem {
 }
 
 export default class ClassController{
-  async index(request: Request,response: Response){
+  async index(request: Request, response: Response){
     const filters = request.query;
 
     const subject = filters.subject as string;
     const week_day = filters.week_day as string;
     const time = filters.time as string;
-
+    
     if(!filters.week_day || !filters.subject || !filters.time){
       return response.status(400).json({
         error : 'Missing filters to search classes'
       });
     }    
-
     const timeInMinutes = convertHourToMinutes(time);
+<<<<<<< HEAD
     const classes = await db('classes')
       .whereExists(function(){
         this.select('class_schedule.*')
@@ -36,8 +36,30 @@ export default class ClassController{
       .where('classes.subject','=',subject)
       .join('users', 'classes.user_id','=','users.id')
       .select(['classes.*','users.*']);
+=======
+    // try{
 
-    return response.json(classes);
+      const classes = await db('classes')
+        .whereExists(function(){
+          this.select('class_schedule.*')
+            .from('class_schedule')
+            .whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
+            .whereRaw('`class_schedule`.`week_day` = ??', [Number(week_day)])
+            .whereRaw('`class_schedule`.`from` <= ??', [timeInMinutes])
+            .whereRaw('`class_schedule`.`to` > ??', [timeInMinutes])
+        })
+        .where('classes.subject','=',subject)
+        .join('users', 'classes.user_id','=','users.id')
+        .select(['classes.*','users.*']);
+>>>>>>> 794236e9889410d45dc26b1456dbd10b0d7b0541
+
+      return response.json(classes);
+    // }catch(err){
+    //   return response.status(400).json({
+    //     error: "Erro não esperado",
+    //     message : err
+    //   });
+    // }
   }
 
   async create(request: Request,response: Response) {
